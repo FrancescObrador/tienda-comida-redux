@@ -1,8 +1,9 @@
-import React, { Suspense, useState } from 'react'
-import { MenuItem } from './entities/entities';
+import React, { Suspense, useEffect, useState } from 'react'
+import { MenuItem, Order } from './entities/entities';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { useSelector } from 'react-redux';
-import { RootState } from './store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from './store';
+import { fetchOrders, deleteAllOrders } from './features/orderSlice';
 
 export const foodItemsContext = React.createContext<MenuItem[]>([]);
 
@@ -27,9 +28,14 @@ function App() {
         },
   ]);
 
+  const dispatch = useDispatch<AppDispatch>();
   const orders = useSelector((state: RootState) => state.order.orders)
   const [isChooseFoodPage, setIsChooseFoodPage] = useState(false);
   
+  useEffect(() => {
+    dispatch(fetchOrders());
+  }, [dispatch])
+
 
   return (
     <>
@@ -69,12 +75,26 @@ function App() {
         <h2>Pedidos realizados:</h2>
         <ul>
           {
-            orders.map((order: MenuItem) => {
-              return <li key={order.id}>{order.name} - {order.quantity}</li>
+            orders.map((order: Order) => {
+              return <li key={order.id}>
+                <ul>
+                  {
+                    order.items.map((item, index) => {
+                        return (
+                        <>
+                          <li key={index}>{item.name}</li>
+                          <li key={item.quantity*item.price}>{item.quantity} * {item.price}</li>
+                        </>
+                        )
+                    })
+                  }
+                </ul>
+              </li>
             })
           }
           </ul>
         </ErrorBoundary>
+        <button onClick={() => dispatch(deleteAllOrders())}>Reset Firebase</button>
       </foodItemsContext.Provider>
       
     

@@ -17,8 +17,10 @@ const FoodOrder = (props: FoodOrderProps) => {
    
     const handleClick = async () => {
         setIsOrdered(true);
+
         let food = {...props.food, quantity: quantity};
         await dispatch(createOrder(food)); 
+        
         setIsOrdered(false);
     }
 
